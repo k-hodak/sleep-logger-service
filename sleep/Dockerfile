@@ -1,13 +1,13 @@
-FROM openjdk:11
+FROM eclipse-temurin:21.0.9_10-jdk
 
 WORKDIR /app
 
 COPY build.gradle gradlew settings.gradle ./
 COPY gradle/ gradle/
 
-RUN ./gradlew wrapper
-
 COPY src/ src
+
+RUN apt-get update && apt-get install -y findutils
 
 RUN ./gradlew build
 
