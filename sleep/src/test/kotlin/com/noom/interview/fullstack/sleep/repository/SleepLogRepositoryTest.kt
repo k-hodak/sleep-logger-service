@@ -70,6 +70,50 @@ class SleepLogRepositoryTest {
         assertNull(result)
     }
 
+    @Test
+    fun `findByUserIdAndSleepDateBetween should return logs within date range`() {
+        val userId = 1L
+        val today = LocalDate.now()
+
+        // Create logs for different dates
+        val logs = listOf(
+            createSleepLog(today.minusDays(5), userId),
+            createSleepLog(today.minusDays(3), userId),
+            createSleepLog(today.minusDays(1), userId),
+            createSleepLog(today.minusDays(10), userId) // Outside range
+        )
+        sleepLogRepository.saveAll(logs)
+
+        // Query for last 5 days
+        val result = sleepLogRepository.findByUserIdAndSleepDateBetweenOrderBySleepDateAsc(
+            userId,
+            today.minusDays(5),
+            today
+        )
+
+        assertEquals(3, result.size)
+        assertEquals(today.minusDays(5), result[0].sleepDate)
+        assertEquals(today.minusDays(3), result[1].sleepDate)
+        assertEquals(today.minusDays(1), result[2].sleepDate)
+    }
+
+    @Test
+    fun `findByUserIdAndSleepDateBetween should return empty list when no logs in range`() {
+        val userId = 1L
+        val today = LocalDate.now()
+
+        // Create log outside the range
+        sleepLogRepository.save(createSleepLog(today.minusDays(40), userId))
+
+        val result = sleepLogRepository.findByUserIdAndSleepDateBetweenOrderBySleepDateAsc(
+            userId,
+            today.minusDays(30),
+            today
+        )
+
+        assertTrue(result.isEmpty())
+    }
+
     private fun createSleepLog(sleepDate: LocalDate, userId: Long = 1L): SleepLog {
         return SleepLog(
             id = null,

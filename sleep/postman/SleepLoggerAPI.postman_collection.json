@@ -29,7 +29,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"timeInBedInterval\": \"2026-02-25T23:00:00/2026-02-26T07:00:00\",\n    \"morningFeeling\": \"GOOD\"\n}"
+					"raw": "{\n    \"bedTime\": \"23:00\",\n    \"wakeTime\": \"07:00\",\n    \"morningFeeling\": \"GOOD\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/sleep",
@@ -55,7 +55,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"timeInBedInterval\": \"2026-02-25T22:30:00/2026-02-26T06:30:00\",\n    \"morningFeeling\": \"OK\"\n}"
+					"raw": "{\n    \"bedTime\": \"22:30\",\n    \"wakeTime\": \"06:30\",\n    \"morningFeeling\": \"OK\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/sleep",
@@ -81,7 +81,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"timeInBedInterval\": \"2026-02-26T01:00:00/2026-02-26T05:30:00\",\n    \"morningFeeling\": \"BAD\"\n}"
+					"raw": "{\n    \"bedTime\": \"01:00\",\n    \"wakeTime\": \"05:30\",\n    \"morningFeeling\": \"BAD\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/sleep",
@@ -107,7 +107,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"timeInBedInterval\": \"2026-02-26T02:00:00/2026-02-26T06:00:00\",\n    \"morningFeeling\": \"BAD\"\n}"
+					"raw": "{\n    \"bedTime\": \"02:00\",\n    \"wakeTime\": \"06:00\",\n    \"morningFeeling\": \"BAD\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/sleep",
@@ -133,7 +133,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"timeInBedInterval\": \"2026-02-25T21:00:00/2026-02-26T08:00:00\",\n    \"morningFeeling\": \"GOOD\"\n}"
+					"raw": "{\n    \"bedTime\": \"21:00\",\n    \"wakeTime\": \"08:00\",\n    \"morningFeeling\": \"GOOD\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/sleep",
@@ -157,6 +157,24 @@
 					"raw": "{{baseUrl}}/api/sleep/last-night",
 					"host": ["{{baseUrl}}"],
 					"path": ["api", "sleep", "last-night"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Last 30 Days Averages",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-User-Id",
+						"value": "1"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/sleep/averages",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "sleep", "averages"]
 				}
 			},
 			"response": []
