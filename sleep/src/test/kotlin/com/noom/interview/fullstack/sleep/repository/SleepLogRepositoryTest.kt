@@ -45,10 +45,35 @@ class SleepLogRepositoryTest {
         assertNull(result)
     }
 
-    private fun createSleepLog(sleepDate: LocalDate): SleepLog {
+    @Test
+    fun `findByUserIdAndSleepDate should return sleep log for matching user and date`() {
+        val userId = 1L
+        val today = LocalDate.now()
+        val sleepLog = createSleepLog(today, userId)
+        sleepLogRepository.save(sleepLog)
+
+        val result = sleepLogRepository.findByUserIdAndSleepDate(userId, today)
+
+        assertNotNull(result)
+        assertEquals(userId, result?.userId)
+        assertEquals(today, result?.sleepDate)
+    }
+
+    @Test
+    fun `findByUserIdAndSleepDate should return null when user does not match`() {
+        val today = LocalDate.now()
+        val sleepLog = createSleepLog(today, 1L)
+        sleepLogRepository.save(sleepLog)
+
+        val result = sleepLogRepository.findByUserIdAndSleepDate(2L, today)
+
+        assertNull(result)
+    }
+
+    private fun createSleepLog(sleepDate: LocalDate, userId: Long = 1L): SleepLog {
         return SleepLog(
             id = null,
-            userId = 1L,
+            userId = userId,
             sleepDate = sleepDate,
             bedTime = LocalTime.of(23, 0),
             wakeTime = LocalTime.of(7, 0),
@@ -57,4 +82,3 @@ class SleepLogRepositoryTest {
         )
     }
 }
-

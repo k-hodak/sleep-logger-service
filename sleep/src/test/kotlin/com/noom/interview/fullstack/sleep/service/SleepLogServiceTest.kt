@@ -53,5 +53,44 @@ class SleepLogServiceTest {
         assertEquals(Duration.ofHours(8).plusMinutes(30), savedLog.totalTimeInBed)
         assertEquals(MorningFeeling.GOOD, savedLog.morningFeeling)
     }
-}
 
+    @Test
+    fun `getLastNightSleepLog should return sleep log when found`() {
+        // Given
+        val userId = 1L
+        val today = LocalDate.now()
+        val sleepLog = SleepLog(
+            id = 1L,
+            userId = userId,
+            sleepDate = today,
+            bedTime = LocalTime.of(23, 0),
+            wakeTime = LocalTime.of(7, 0),
+            totalTimeInBed = Duration.ofHours(8),
+            morningFeeling = MorningFeeling.GOOD
+        )
+        whenever(sleepLogRepository.findByUserIdAndSleepDate(userId, today)).thenReturn(sleepLog)
+
+        // When
+        val result = sleepLogService.getLastNightSleepLog(userId)
+
+        // Then
+        assertNotNull(result)
+        assertEquals(1L, result?.id)
+        assertEquals(userId, result?.userId)
+        assertEquals(today, result?.sleepDate)
+    }
+
+    @Test
+    fun `getLastNightSleepLog should return null when not found`() {
+        // Given
+        val userId = 1L
+        val today = LocalDate.now()
+        whenever(sleepLogRepository.findByUserIdAndSleepDate(userId, today)).thenReturn(null)
+
+        // When
+        val result = sleepLogService.getLastNightSleepLog(userId)
+
+        // Then
+        assertNull(result)
+    }
+}

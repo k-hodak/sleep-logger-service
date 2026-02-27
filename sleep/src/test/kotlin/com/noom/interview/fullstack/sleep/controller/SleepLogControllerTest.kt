@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import java.time.Duration
 import java.time.LocalDate
@@ -59,5 +60,46 @@ class SleepLogControllerTest {
             content { string("") }
         }
     }
-}
 
+    @Test
+    fun `GET last-night should return sleep log when found`() {
+        // Given
+        val userId = 1L
+        val sleepLog = SleepLog(
+            id = 1L,
+            userId = userId,
+            sleepDate = LocalDate.of(2026, 2, 27),
+            bedTime = LocalTime.of(23, 0),
+            wakeTime = LocalTime.of(7, 0),
+            totalTimeInBed = Duration.ofHours(8),
+            morningFeeling = MorningFeeling.GOOD
+        )
+        whenever(sleepLogService.getLastNightSleepLog(userId)).thenReturn(sleepLog)
+
+        // When & Then
+        mockMvc.get("/api/sleep/last-night") {
+            header("X-User-Id", userId)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.sleepDate") { value("2026-02-27") }
+            jsonPath("$.bedTime") { value("23:00:00") }
+            jsonPath("$.wakeTime") { value("07:00:00") }
+            jsonPath("$.totalTimeInBed") { value("8h 0m") }
+            jsonPath("$.morningFeeling") { value("GOOD") }
+        }
+    }
+
+    @Test
+    fun `GET last-night should return 404 when not found`() {
+        // Given
+        val userId = 1L
+        whenever(sleepLogService.getLastNightSleepLog(userId)).thenReturn(null)
+
+        // When & Then
+        mockMvc.get("/api/sleep/last-night") {
+            header("X-User-Id", userId)
+        }.andExpect {
+            status { isNotFound() }
+        }
+    }
+}
