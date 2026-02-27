@@ -142,6 +142,24 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Get Last Night Sleep Log",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-User-Id",
+						"value": "1"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/sleep/last-night",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "sleep", "last-night"]
+				}
+			},
+			"response": []
 		}
 	]
 }
