@@ -2,6 +2,7 @@ package com.noom.interview.fullstack.sleep.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.noom.interview.fullstack.sleep.model.MorningFeeling
+import com.noom.interview.fullstack.sleep.model.SleepAveragesResponse
 import com.noom.interview.fullstack.sleep.model.SleepLog
 import com.noom.interview.fullstack.sleep.model.SleepLogRequest
 import com.noom.interview.fullstack.sleep.service.SleepLogService
@@ -36,7 +37,8 @@ class SleepLogControllerTest {
         // Given
         val userId = 1L
         val request = SleepLogRequest(
-            timeInBedInterval = "2026-02-25T23:00:00/2026-02-26T07:00:00",
+            bedTime = LocalTime.of(23, 0),
+            wakeTime = LocalTime.of(7, 0),
             morningFeeling = MorningFeeling.GOOD
         )
         val savedLog = SleepLog(
@@ -97,6 +99,54 @@ class SleepLogControllerTest {
 
         // When & Then
         mockMvc.get("/api/sleep/last-night") {
+            header("X-User-Id", userId)
+        }.andExpect {
+            status { isNotFound() }
+        }
+    }
+
+    @Test
+    fun `GET averages should return averages when data exists`() {
+        // Given
+        val userId = 1L
+        val averages = SleepAveragesResponse(
+            dateRangeStart = LocalDate.of(2026, 1, 28),
+            dateRangeEnd = LocalDate.of(2026, 2, 26),
+            averageTotalTimeInBed = "7h 30m",
+            averageBedTime = LocalTime.of(23, 15),
+            averageWakeTime = LocalTime.of(6, 45),
+            morningFeelingFrequencies = mapOf(
+                MorningFeeling.GOOD to 15,
+                MorningFeeling.OK to 10,
+                MorningFeeling.BAD to 5
+            )
+        )
+        whenever(sleepLogService.getLast30DaysAverages(userId)).thenReturn(averages)
+
+        // When & Then
+        mockMvc.get("/api/sleep/averages") {
+            header("X-User-Id", userId)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.dateRangeStart") { value("2026-01-28") }
+            jsonPath("$.dateRangeEnd") { value("2026-02-26") }
+            jsonPath("$.averageTotalTimeInBed") { value("7h 30m") }
+            jsonPath("$.averageBedTime") { value("23:15:00") }
+            jsonPath("$.averageWakeTime") { value("06:45:00") }
+            jsonPath("$.morningFeelingFrequencies.GOOD") { value(15) }
+            jsonPath("$.morningFeelingFrequencies.OK") { value(10) }
+            jsonPath("$.morningFeelingFrequencies.BAD") { value(5) }
+        }
+    }
+
+    @Test
+    fun `GET averages should return 404 when no data exists`() {
+        // Given
+        val userId = 1L
+        whenever(sleepLogService.getLast30DaysAverages(userId)).thenReturn(null)
+
+        // When & Then
+        mockMvc.get("/api/sleep/averages") {
             header("X-User-Id", userId)
         }.andExpect {
             status { isNotFound() }

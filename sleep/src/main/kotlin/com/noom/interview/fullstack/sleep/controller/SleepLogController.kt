@@ -1,5 +1,6 @@
 package com.noom.interview.fullstack.sleep.controller
 
+import com.noom.interview.fullstack.sleep.model.SleepAveragesResponse
 import com.noom.interview.fullstack.sleep.model.SleepLogRequest
 import com.noom.interview.fullstack.sleep.model.SleepLogResponse
 import com.noom.interview.fullstack.sleep.service.SleepLogService
@@ -41,6 +42,21 @@ class SleepLogController(private val sleepLogService: SleepLogService) {
             ResponseEntity.ok(SleepLogResponse.from(sleepLog))
         } else {
             logger.info("No sleep log found.")
+            ResponseEntity.notFound().build()
+        }
+    }
+
+    @GetMapping("/averages")
+    fun getLast30DaysAverages(
+        @RequestHeader("X-User-Id") userId: Long
+    ): ResponseEntity<SleepAveragesResponse> {
+        logger.info("Received request to get last 30 days averages.")
+        val averages = sleepLogService.getLast30DaysAverages(userId)
+        return if (averages != null) {
+            logger.info("Returning last 30 days averages.")
+            ResponseEntity.ok(averages)
+        } else {
+            logger.info("No sleep data found for averages.")
             ResponseEntity.notFound().build()
         }
     }
