@@ -1,0 +1,148 @@
+{
+	"info": {
+		"_postman_id": "sleep-logger-api",
+		"name": "Sleep Logger API",
+		"description": "API collection for testing the Sleep Logger service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Create Sleep Log - Good Feeling",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-User-Id",
+						"value": "1"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"timeInBedInterval\": \"2026-02-25T23:00:00/2026-02-26T07:00:00\",\n    \"morningFeeling\": \"GOOD\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/sleep",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "sleep"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Sleep Log - OK Feeling",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-User-Id",
+						"value": "1"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"timeInBedInterval\": \"2026-02-25T22:30:00/2026-02-26T06:30:00\",\n    \"morningFeeling\": \"OK\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/sleep",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "sleep"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Sleep Log - Bad Feeling",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-User-Id",
+						"value": "1"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"timeInBedInterval\": \"2026-02-26T01:00:00/2026-02-26T05:30:00\",\n    \"morningFeeling\": \"BAD\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/sleep",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "sleep"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Sleep Log - Short Sleep",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-User-Id",
+						"value": "1"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"timeInBedInterval\": \"2026-02-26T02:00:00/2026-02-26T06:00:00\",\n    \"morningFeeling\": \"BAD\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/sleep",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "sleep"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Sleep Log - Long Sleep",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-User-Id",
+						"value": "1"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"timeInBedInterval\": \"2026-02-25T21:00:00/2026-02-26T08:00:00\",\n    \"morningFeeling\": \"GOOD\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/sleep",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "sleep"]
+				}
+			},
+			"response": []
+		}
+	]
+}
+

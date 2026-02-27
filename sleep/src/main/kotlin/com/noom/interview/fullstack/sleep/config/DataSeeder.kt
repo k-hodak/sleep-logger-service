@@ -2,14 +2,13 @@ package com.noom.interview.fullstack.sleep.config
 
 import com.noom.interview.fullstack.sleep.model.MorningFeeling
 import com.noom.interview.fullstack.sleep.model.SleepLog
+import com.noom.interview.fullstack.sleep.repository.SleepLogRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
-import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.queryForObject
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
@@ -23,20 +22,20 @@ import kotlin.random.Random
 @Configuration
 @Profile("local")
 class DataSeeder(
-    @param:Value("\${sleep.seeder.days:30}")
+    @Value("\${sleep.seeder.days:30}")
     private val seedDays: Int
 ) {
 
     private val logger = LoggerFactory.getLogger(DataSeeder::class.java)
 
     @Bean
-    fun seedSleepData(jdbcTemplate: JdbcTemplate): CommandLineRunner {
+    fun seedSleepData(sleepLogRepository: SleepLogRepository): CommandLineRunner {
         return CommandLineRunner {
             val yesterday = LocalDate.now().minusDays(1)
-            val seedPlan = calculateSeedPlan(jdbcTemplate, yesterday) ?: return@CommandLineRunner
+            val seedPlan = calculateSeedPlan(sleepLogRepository, yesterday) ?: return@CommandLineRunner
 
             val sleepLogs = generateSleepLogs(seedPlan.days, seedPlan.startDate)
-            insertSleepLogs(jdbcTemplate, sleepLogs)
+            sleepLogRepository.saveAll(sleepLogs)
 
             logger.info("Seeded {} sleep log entries.", sleepLogs.size)
         }
@@ -44,15 +43,15 @@ class DataSeeder(
 
     private data class SeedPlan(val days: Int, val startDate: LocalDate)
 
-    private fun calculateSeedPlan(jdbcTemplate: JdbcTemplate, yesterday: LocalDate): SeedPlan? {
-        val count = getRecordCount(jdbcTemplate)
+    private fun calculateSeedPlan(repository: SleepLogRepository, yesterday: LocalDate): SeedPlan? {
+        val count = repository.count()
 
-        if (count == 0) {
+        if (count == 0L) {
             logger.info("No sleep data found, seeding {} days.", seedDays)
             return SeedPlan(seedDays, yesterday)
         }
 
-        val latestDate = getLatestSleepDate(jdbcTemplate)
+        val latestDate = repository.findTopByOrderBySleepDateDesc()?.sleepDate
 
         if (latestDate != null && latestDate >= yesterday) {
             logger.info("Sleep data is up to date ({} records, latest: {}), skipping seed.", count, latestDate)
@@ -75,37 +74,10 @@ class DataSeeder(
         }
     }
 
-    private fun getRecordCount(jdbcTemplate: JdbcTemplate): Int {
-        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM sleep_log") ?: 0
-    }
-
-    private fun getLatestSleepDate(jdbcTemplate: JdbcTemplate): LocalDate? {
-        return jdbcTemplate.queryForObject("SELECT MAX(sleep_date) FROM sleep_log")
-    }
-
-    private fun insertSleepLogs(jdbcTemplate: JdbcTemplate, sleepLogs: List<SleepLog>) {
-        sleepLogs.forEach { log ->
-            logger.info("Inserting sleep log for date: {}", log.sleepDate)
-            jdbcTemplate.update(
-                """
-                INSERT INTO sleep_log (sleep_date, bed_time, wake_time, total_time_in_bed, morning_feeling)
-                VALUES (?, ?, ?, ?::interval, ?)
-                """,
-                log.sleepDate,
-                log.bedTime,
-                log.wakeTime,
-                formatDuration(log.totalTimeInBed),
-                log.morningFeeling.name
-            )
-        }
-    }
-
     private fun generateSleepLogs(days: Int, startDate: LocalDate): List<SleepLog> {
         logger.info("Generating {} sleep logs starting from {}", days, startDate)
-        // Generate from oldest (days-1 ago) to newest (startDate), so highest ID = most recent
         return ((days - 1) downTo 0).map { daysAgo ->
             val date = startDate.minusDays(daysAgo.toLong())
-            logger.info("Generating log for daysAgo={}, date={}", daysAgo, date)
             generateSleepLog(date)
         }
     }
@@ -117,12 +89,17 @@ class DataSeeder(
 
         return SleepLog(
             id = null,
+            userId = DEFAULT_USER_ID,
             sleepDate = sleepDate,
             bedTime = bedTime,
             wakeTime = wakeTime,
             totalTimeInBed = totalTimeInBed,
             morningFeeling = randomMorningFeeling()
         )
+    }
+
+    companion object {
+        private const val DEFAULT_USER_ID = 1L
     }
 
     private fun randomBedTime(): LocalTime {
@@ -143,9 +120,5 @@ class DataSeeder(
             in 26..65 -> MorningFeeling.OK
             else -> MorningFeeling.GOOD
         }
-    }
-
-    private fun formatDuration(duration: Duration): String {
-        return "${duration.toHours()} hours ${duration.toMinutesPart()} minutes"
     }
 }
